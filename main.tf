@@ -9,14 +9,14 @@ resource "aws_instance" "LBWebServer1" {
   associate_public_ip_address = true
   security_groups = LBserverSG
   user_data = <<EOF
-"#!/bin/bash
-sudo su
-yum update -y
-yum install httpd -y
-systemctl start httpd
-systemctl enable httpd
-echo "<html><h1> Welcome to Luca's 1st server! </h1><html>" >> /var/www/html/index.html"
-EOF
+  "#!/bin/bash
+  sudo su
+  yum update -y
+  yum install httpd -y
+  systemctl start httpd
+  systemctl enable httpd
+  echo "<html><h1> Welcome to Luca's 1st server! </h1><html>" >> /var/www/html/index.html"
+  EOF
   tags = {
     name = "LBWebServer1"
   }
