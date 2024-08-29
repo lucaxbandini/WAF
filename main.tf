@@ -15,7 +15,7 @@ resource "aws_instance" "LBWebServer2" {
   ami           = "ami-02c21308fed24a8ab"
   instance_type = "t2.micro"
   key_name      = "LBserverKP"
-  tags = {
+  tags = { f
     name = "LBWebServer2"
   }
 }
