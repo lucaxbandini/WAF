@@ -3,12 +3,11 @@ provider "aws" {
 }
 
 resource "aws_instance" "LBWebServer1" {
-  ami           = "ami-02c21308fed24a8ab"
-  instance_type = "t2.micro"
-  key_name      = "LBserverKP"
+  ami                         = "ami-02c21308fed24a8ab"
+  instance_type               = "t2.micro"
+  key_name                    = "LBserverKP"
   associate_public_ip_address = true
-  security_groups = LBserverSG
-  user_data = <<EOF
+  user_data                   = <<EOF
   "#!/bin/bash
   sudo su
   yum update -y
@@ -23,12 +22,11 @@ resource "aws_instance" "LBWebServer1" {
 }
 
 resource "aws_instance" "LBWebServer2" {
-  ami           = "ami-02c21308fed24a8ab"
-  instance_type = "t2.micro"
-  key_name      = "LBserverKP"
+  ami                         = "ami-02c21308fed24a8ab"
+  instance_type               = "t2.micro"
+  key_name                    = "LBserverKP"
   associate_public_ip_address = true
-  security_groups = LBserverSG
-  user_data = <<EOF
+  user_data                   = <<EOF
   #!/bin/bash
   sudo su
   yum update -y
@@ -82,4 +80,11 @@ resource "aws_vpc_security_group_ingress_rule" "allow_https_ipv4" {
   ip_protocol       = "https"
   to_port           = 443
   description       = "allows https"
+}
+
+resource "aws_lb_target_group" "LB-WAF-TG" {
+  name     = "LB-WAF-TG"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
 }
