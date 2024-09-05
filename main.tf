@@ -47,6 +47,13 @@ resource "aws_security_group" "LBserverSG" {
   }
 }
 
+resource "aws_security_group" "LBserverSG2" {
+  description = "Luca's Server SG2"
+  tags = {
+    Name = "LBserverSG2"
+  }
+}
+
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 
@@ -64,31 +71,34 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
+resource "aws_security_group_rule" "allow_ssh_ipv4" {
   security_group_id = aws_security_group.LBserverSG.id
-  cidr_ipv4         = aws_vpc.main.cidr_block
+  cidr_blocks       = [aws_vpc.main.cidr_block]
+  type              = "ingress"
   from_port         = 22
-  ip_protocol       = "ssh"
+  protocol          = "tcp"
   to_port           = 22
   description       = "allows ssh"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_http_ipv4" {
-  security_group_id = aws_security_group.LBserverSG.id
-  cidr_ipv4         = aws_vpc.main.cidr_block
-  from_port         = 8080
-  ip_protocol       = "http"
-  to_port           = 8080
-  description       = "allows http"
+resource "aws_security_group_rule" "allow_http_ipv4" {
+  security_group_id        = aws_security_group.LBserverSG.id
+  source_security_group_id = aws_security_group.LBserverSG2.id
+  type                     = "ingress"
+  from_port                = 80
+  protocol                 = "tcp"
+  to_port                  = 80
+  description              = "allows http"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_https_ipv4" {
-  security_group_id = aws_security_group.LBserverSG.id
-  cidr_ipv4         = aws_vpc.main.cidr_block
-  from_port         = 443
-  ip_protocol       = "https"
-  to_port           = 443
-  description       = "allows https"
+resource "aws_security_group_rule" "lb_allow_http_ipv4" {
+  security_group_id = aws_security_group.LBserverSG2.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  type              = "ingress"
+  from_port         = 80
+  protocol          = "tcp"
+  to_port           = 80
+  description       = "allows http"
 }
 
 resource "aws_lb_target_group" "LB-WAF-TG" {
@@ -96,6 +106,18 @@ resource "aws_lb_target_group" "LB-WAF-TG" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
+}
+
+resource "aws_lb_target_group_attachment" "LB-WAF-TG-EC2-1" {
+  target_group_arn = aws_lb_target_group.LB-WAF-TG.arn
+  target_id        = aws_instance.LBWebServer1.id
+  port             = 80
+}
+
+resource "aws_lb_target_group_attachment" "LB-WAF-TG-EC2-2" {
+  target_group_arn = aws_lb_target_group.LB-WAF-TG.arn
+  target_id        = aws_instance.LBWebServer2.id
+  port             = 80
 }
 
 resource "aws_lb" "LB-WAF-ALB" {
@@ -114,13 +136,11 @@ resource "aws_lb" "LB-WAF-ALB" {
 
 resource "aws_lb_listener" "LB-WAF-ALB" {
   load_balancer_arn = aws_lb.LB-WAF-ALB.arn
-  port              = "8080"
+  port              = "80"
   protocol          = "HTTP"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
-
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.LB-WAF-TG.arn
   }
 }
+
