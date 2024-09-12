@@ -143,4 +143,3 @@ resource "aws_lb_listener" "LB-WAF-ALB" {
     target_group_arn = aws_lb_target_group.LB-WAF-TG.arn
   }
 }
-test
