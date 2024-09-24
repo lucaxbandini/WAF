@@ -143,3 +143,114 @@ resource "aws_lb_listener" "LB-WAF-ALB" {
     target_group_arn = aws_lb_target_group.LB-WAF-TG.arn
   }
 }
+
+resource "aws_wafv2_web_acl" "ruleset" {
+  name        = "luca_web_acl_rules"
+  description = "Rules for IP Reputation, Anonymous IPs, Core Rule Set, and Known Bad Inputs"
+  scope       = "REGIONAL"
+
+  default_action {
+    allow {}
+  }
+
+  rule {
+    name     = "ip-reputation-list"
+    priority = 1
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesAmazonIpReputationList"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      count {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "ip-reputation-metrics"
+      sampled_requests_enabled   = false
+    }
+  }
+
+  rule {
+    name     = "anonymous-ip-list"
+    priority = 2
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesAnonymousIpList"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      count {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "anonymous-ip-metrics"
+      sampled_requests_enabled   = false
+    }
+  }
+
+  rule {
+    name     = "core-rule-set"
+    priority = 3
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesCommonRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      count {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "core-rule-set-metrics"
+      sampled_requests_enabled   = false
+    }
+  }
+
+  rule {
+    name     = "known-bad-inputs"
+    priority = 4
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    override_action {
+      count {}
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = false
+      metric_name                = "known-bad-inputs-metrics"
+      sampled_requests_enabled   = false
+    }
+  }
+
+  tags = {
+    Tag1 = "Security"
+    Tag2 = "WAFv2"
+  }
+
+  token_domains = ["mywebsite.com", "myotherwebsite.com"]
+
+  visibility_config {
+    cloudwatch_metrics_enabled = false
+    metric_name                = "web-acl-metrics"
+    sampled_requests_enabled   = false
+  }
+}
