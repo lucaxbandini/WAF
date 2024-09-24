@@ -1,5 +1,5 @@
 provider "aws" {
-  
+
   region = "us-east-1"
 }
 
@@ -43,6 +43,7 @@ resource "aws_instance" "LBWebServer2" {
 
 resource "aws_security_group" "LBserverSG" {
   description = "Luca's Server SG"
+  vpc_id      = aws_vpc.main.id
   tags = {
     Name = "LBserverSG"
   }
@@ -50,6 +51,7 @@ resource "aws_security_group" "LBserverSG" {
 
 resource "aws_security_group" "LBserverSG2" {
   description = "Luca's Server SG2"
+  vpc_id      = aws_vpc.main.id
   tags = {
     Name = "LBserverSG2"
   }
