@@ -15,7 +15,7 @@ resource "aws_instance" "LBWebServer1" {
   yum install httpd -y
   systemctl start httpd
   systemctl enable httpd
-  echo "<html><h1> Welcome to Luca's 1st server! </h1><html>" >> /var/www/html/index.html"
+  echo "<html><h1> Welcome to Luca's 1st server! </h1><html>" >> /var/www/html/index.html
   EOF
   tags = {
     name = "LBWebServer1"
@@ -34,7 +34,7 @@ resource "aws_instance" "LBWebServer2" {
   yum install httpd -y
   systemctl start httpd
   systemctl enable httpd
-  echo "<html><h1> Welcome to Luca's 2nd server! </h1><html>" >> /var/www/html/index.html"
+  echo "<html><h1> Welcome to Luca's 2nd server! </h1><html>" >> /var/www/html/index.html
   EOF
   tags = {
     name = "LBWebServer2"
@@ -95,13 +95,14 @@ resource "aws_security_group_rule" "allow_http_ipv4" {
 }
 
 resource "aws_security_group_rule" "lb_allow_http_ipv4" {
-  security_group_id = aws_security_group.LBserverSG2.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  type              = "ingress"
-  from_port         = 80
-  protocol          = "tcp"
-  to_port           = 80
-  description       = "allows http"
+  security_group_id        = aws_security_group.LBserverSG2.id
+  source_security_group_id = aws_security_group.LBserverSG.id
+  cidr_blocks              = ["0.0.0.0/0"]
+  type                     = "ingress"
+  from_port                = 80
+  protocol                 = "tcp"
+  to_port                  = 80
+  description              = "allows http"
 }
 
 resource "aws_lb_target_group" "LB-WAF-TG" {
