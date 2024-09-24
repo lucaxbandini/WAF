@@ -42,7 +42,7 @@ resource "aws_instance" "LBWebServer2" {
 }
 
 resource "aws_security_group" "LBserverSG" {
-  description = "Luca's Server SG"
+  description = "Luca Server SG"
   vpc_id      = aws_vpc.main.id
   tags = {
     Name = "LBserverSG"
@@ -50,7 +50,7 @@ resource "aws_security_group" "LBserverSG" {
 }
 
 resource "aws_security_group" "LBserverSG2" {
-  description = "Luca's Server SG2"
+  description = "Luca Server SG2"
   vpc_id      = aws_vpc.main.id
   tags = {
     Name = "LBserverSG2"
