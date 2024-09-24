@@ -1,4 +1,5 @@
 provider "aws" {
+
   region = "us-east-1"
 }
 
@@ -124,8 +125,8 @@ resource "aws_lb" "LB-WAF-ALB" {
   name               = "LB-WAF-ALB"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.LBserverSG]
-  subnets            = [for subnet in aws_subnet.public : subnet.id]
+  security_groups    = [aws_security_group.LBserverSG.id]
+  subnets            = [aws_subnet.public.id]
 
   enable_deletion_protection = true
 
