@@ -18,6 +18,7 @@ resource "aws_instance" "LBWebServer1" {
   sudo su
   yum update -y
   yum install httpd -y
+  yum install httpd-tools -y
   systemctl start httpd
   systemctl enable httpd
   echo "<html><h1> Welcome to Luca's 1st server! </h1><html>" >> /var/www/html/index.html
@@ -42,6 +43,7 @@ resource "aws_instance" "LBWebServer2" {
   sudo su
   yum update -y
   yum install httpd -y
+  yum install httpd-tools -y
   systemctl start httpd
   systemctl enable httpd
   echo "<html><h1> Welcome to Luca's 2nd server! </h1><html>" >> /var/www/html/index.html
