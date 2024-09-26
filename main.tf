@@ -1,6 +1,6 @@
 provider "aws" {
 
-  region = "us-east-1"
+  region     = "us-east-1"
 }
 
 resource "aws_instance" "LBWebServer1" {
@@ -163,13 +163,13 @@ resource "aws_security_group_rule" "allow_all_outbound" {
 }
 
 resource "aws_security_group_rule" "allow_http_ipv4" {
-  security_group_id        = aws_security_group.LBserverSG.id
-  source_security_group_id = aws_security_group.LBserverSG2.id
-  type                     = "ingress"
-  from_port                = 80
-  protocol                 = "tcp"
-  to_port                  = 80
-  description              = "allows http"
+  security_group_id = aws_security_group.LBserverSG.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  type              = "ingress"
+  from_port         = 80
+  protocol          = "tcp"
+  to_port           = 80
+  description       = "allows http"
 }
 
 resource "aws_security_group_rule" "lb_allow_http_ipv4" {
@@ -188,6 +188,16 @@ resource "aws_lb_target_group" "LB-WAF-TG" {
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_vpc.main.id
+
+  health_check {
+    path                = "/index.html"
+    port                = "80"
+    protocol            = "HTTP"
+    healthy_threshold   = 3
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
+  }
 }
 
 resource "aws_lb_target_group_attachment" "LB-WAF-TG-EC2-1" {
