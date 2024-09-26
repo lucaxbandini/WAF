@@ -1,14 +1,19 @@
 provider "aws" {
 
-  region = "us-east-1"
+  region     = "us-east-1"
 }
 
 resource "aws_instance" "LBWebServer1" {
-  ami                         = "ami-02c21308fed24a8ab"
-  instance_type               = "t2.micro"
-  key_name                    = "LBserverKP"
-  associate_public_ip_address = true
-  user_data                   = <<EOF
+  ami           = "ami-02c21308fed24a8ab"
+  instance_type = "t2.micro"
+  key_name      = "LBserverKP"
+
+  network_interface {
+    network_interface_id = aws_network_interface.server1.id
+    device_index         = 0
+  }
+
+  user_data = <<EOF
   "#!/bin/bash
   sudo su
   yum update -y
@@ -23,11 +28,16 @@ resource "aws_instance" "LBWebServer1" {
 }
 
 resource "aws_instance" "LBWebServer2" {
-  ami                         = "ami-02c21308fed24a8ab"
-  instance_type               = "t2.micro"
-  key_name                    = "LBserverKP"
-  associate_public_ip_address = true
-  user_data                   = <<EOF
+  ami           = "ami-02c21308fed24a8ab"
+  instance_type = "t2.micro"
+  key_name      = "LBserverKP"
+
+  network_interface {
+    network_interface_id = aws_network_interface.server2.id
+    device_index         = 0
+  }
+
+  user_data = <<EOF
   #!/bin/bash
   sudo su
   yum update -y
@@ -66,11 +76,44 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "public" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+  tags = {
+    Name = "LucaWAFsn1"
+  }
+}
+
+resource "aws_subnet" "public2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "LucaWAFsn2"
+  }
+}
+
+resource "aws_network_interface" "server1" {
+  subnet_id = aws_subnet.public.id
 
   tags = {
-    Name = "LucaWAFsn"
+    Name = "primary_network_interface1"
+  }
+}
+
+resource "aws_network_interface" "server2" {
+  subnet_id = aws_subnet.public.id
+
+  tags = {
+    Name = "primary_network_interface2"
+  }
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main"
   }
 }
 
@@ -127,8 +170,9 @@ resource "aws_lb" "LB-WAF-ALB" {
   name               = "LB-WAF-ALB"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.LBserverSG.id]
-  subnets            = [aws_subnet.public.id]
+
+  security_groups = [aws_security_group.LBserverSG.id]
+  subnets         = [aws_subnet.public.id, aws_subnet.public2.id]
 
   enable_deletion_protection = true
 
