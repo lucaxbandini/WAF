@@ -1,6 +1,6 @@
 provider "aws" {
 
-  region = "us-east-1"
+  region     = "us-east-1"
 }
 
 resource "aws_instance" "LBWebServer1" {
@@ -46,7 +46,20 @@ resource "aws_instance" "LBWebServer2" {
   yum install httpd-tools -y
   systemctl start httpd
   systemctl enable httpd
-  echo "<html><h1> Welcome to Luca's 2nd server! </h1><html>" >> /var/www/html/index.html
+  echo "<html><h1> Welcome to Luca's 2nd server! </h1><html>
+  <!DOCTYPE html>
+<html lang="en">
+<p>I'm Nobody! Who are you?<br>
+Are you - Nobody - Too?<br>
+Then there's a pair of us!<br>
+Don't tell! They'd banish us - you know!</p>
+
+<p>How dreary - to be - Somebody!<br>
+How public - like a Frog -<br>
+To tell one's name - the livelong June -<br>
+To an admiring Bog!
+
+<p><cite>By Emily Dickinson (1891)</cite></p>" >> /var/www/html/index.html
   EOF
   tags = {
     name = "LBWebServer2"
